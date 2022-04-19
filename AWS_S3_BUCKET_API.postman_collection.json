@@ -1,0 +1,748 @@
+{
+	"info": {
+		"_postman_id": "13a37e31-d0fc-4542-a8d1-4bb7f9ab8d0f",
+		"name": "AWS_S3_BUCKET_API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1_CreateBucket",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Bucket Created Successfully\", function () {\r",
+							"    \r",
+							"     pm.response.to.have.status(200);\r",
+							"    \r",
+							"})\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": " <CreateBucketConfiguration xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\"> \r\n             <LocationConstraint>eu-west-2</LocationConstraint> \r\n</CreateBucketConfiguration >",
+					"options": {
+						"raw": {
+							"language": "xml"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{BUCKET_NAME}}.s3.{{AWS_REGION}}.amazonaws.com",
+					"host": [
+						"{{BUCKET_NAME}}",
+						"s3",
+						"{{AWS_REGION}}",
+						"amazonaws",
+						"com"
+					],
+					"query": [
+						{
+							"key": "",
+							"value": "",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "2_PutBucketTagging",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"var md5checksum = CryptoJS.MD5(\"\"+pm.request.body+\"\");\r",
+							"base64value = CryptoJS.enc.Base64.stringify(md5checksum);\r",
+							"postman.setGlobalVariable(\"contentMD5\", base64value);"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Bucket Tags Added Successfully\", function () {\r",
+							"    \r",
+							"     pm.response.to.have.status(204);\r",
+							"    \r",
+							"})\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-MD5",
+						"value": "{{contentMD5}}",
+						"type": "default"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<Tagging xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\">\r\n   <TagSet>\r\n      <Tag>\r\n         <Key>Name</Key>\r\n         <Value>GuyBarros</Value>\r\n      </Tag>\r\n   </TagSet>\r\n</Tagging>",
+					"options": {
+						"raw": {
+							"language": "xml"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{BUCKET_NAME}}.s3.{{AWS_REGION}}.amazonaws.com?tagging",
+					"host": [
+						"{{BUCKET_NAME}}",
+						"s3",
+						"{{AWS_REGION}}",
+						"amazonaws",
+						"com"
+					],
+					"query": [
+						{
+							"key": "tagging",
+							"value": null
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "3_GetBucketTagging",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Bucket has Valid Tags\", function () {\r",
+							"    const responseJson = xml2Json(pm.response.text());\r",
+							"    const tags = responseJson.Tagging.TagSet\r",
+							"    console.log(\"----> \" + JSON.stringify(tags));\r",
+							"\r",
+							"    pm.expect(tags).to.have.property(\"Tag\");\r",
+							"\r",
+							"})\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{BUCKET_NAME}}.s3.{{AWS_REGION}}.amazonaws.com?tagging",
+					"host": [
+						"{{BUCKET_NAME}}",
+						"s3",
+						"{{AWS_REGION}}",
+						"amazonaws",
+						"com"
+					],
+					"query": [
+						{
+							"key": "tagging",
+							"value": null
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "4_GetBucketEncryption",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Bucket Is Encrypted\", function () {\r",
+							"    const responseJson = xml2Json(pm.response.text());\r",
+							"    \r",
+							"    console.log(\"----> \" + JSON.stringify(responseJson));\r",
+							"\r",
+							"    pm.expect(responseJson).to.not.have.property(\"Error\");\r",
+							"\r",
+							"})\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{BUCKET_NAME}}.s3.{{AWS_REGION}}.amazonaws.com/?encryption",
+					"host": [
+						"{{BUCKET_NAME}}",
+						"s3",
+						"{{AWS_REGION}}",
+						"amazonaws",
+						"com"
+					],
+					"path": [
+						""
+					],
+					"query": [
+						{
+							"key": "encryption",
+							"value": null
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "5_GetBucketPolicy",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Bucket Has IAM Policy\", function () {\r",
+							"    const responseJson = xml2Json(pm.response.text());\r",
+							"    \r",
+							"    console.log(\"----> \" + JSON.stringify(responseJson));\r",
+							"\r",
+							"    pm.expect(responseJson).to.not.have.property(\"Error\");\r",
+							"\r",
+							"})\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{BUCKET_NAME}}.s3.{{AWS_REGION}}.amazonaws.com?policy",
+					"host": [
+						"{{BUCKET_NAME}}",
+						"s3",
+						"{{AWS_REGION}}",
+						"amazonaws",
+						"com"
+					],
+					"query": [
+						{
+							"key": "policy",
+							"value": null
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "6_PutBucketEncryption",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"var md5checksum = CryptoJS.MD5(\"\"+pm.request.body+\"\");\r",
+							"base64value = CryptoJS.enc.Base64.stringify(md5checksum);\r",
+							"postman.setGlobalVariable(\"contentMD5\", base64value);"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Encrypt Bucket\", function () {\r",
+							"    \r",
+							"     pm.response.to.have.status(200);\r",
+							"     \r",
+							"    \r",
+							"})\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-MD5",
+						"value": "{{contentMD5}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "<ServerSideEncryptionConfiguration xmlns=\"http://doc.s3.amazonaws.com/2006-03-01/\">\r\n    <Rule>\r\n        <ApplyServerSideEncryptionByDefault>\r\n         <SSEAlgorithm>AES256</SSEAlgorithm>\r\n        </ApplyServerSideEncryptionByDefault>\r\n    </Rule>\r\n</ServerSideEncryptionConfiguration>",
+					"options": {
+						"raw": {
+							"language": "xml"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{BUCKET_NAME}}.s3.{{AWS_REGION}}.amazonaws.com?encryption",
+					"host": [
+						"{{BUCKET_NAME}}",
+						"s3",
+						"{{AWS_REGION}}",
+						"amazonaws",
+						"com"
+					],
+					"query": [
+						{
+							"key": "encryption",
+							"value": null
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "7_PutBucketPolicy",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Add IAM Policy to Bucket\", function () {\r",
+							"    \r",
+							"     pm.response.to.have.status(204);\r",
+							"     \r",
+							"    \r",
+							"})\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\"Version\":\"2008-10-17\",\r\n\"Id\":\"guy-test-s3-api-policy\",\r\n\"Statement\" : [\r\n    {\r\n        \"Effect\":\"Allow\",\r\n        \"Sid\":\"1\", \r\n        \"Principal\" : {\r\n            \"AWS\":[\"arn:aws:sts::711129375688:assumed-role/se_demos_dev-developer/guy@hashicorp.com\"]\r\n        },\r\n        \"Action\":[\"s3:*\"],\r\n        \"Resource\":\"arn:aws:s3:::{{BUCKET_NAME}}\"\r\n    },\r\n    {\r\n            \"Sid\": \"AWSCloudTrailAclCheck\",\r\n            \"Effect\": \"Allow\",\r\n            \"Principal\": {\r\n              \"Service\": \"cloudtrail.amazonaws.com\"\r\n            },\r\n            \"Action\": \"s3:GetBucketAcl\",\r\n            \"Resource\":\"arn:aws:s3:::{{BUCKET_NAME}}\"\r\n        },\r\n        {\r\n            \"Sid\": \"AWSCloudTrailWrite\",\r\n            \"Effect\": \"Allow\",\r\n            \"Principal\": {\r\n              \"Service\": \"cloudtrail.amazonaws.com\"\r\n            },\r\n            \"Action\": \"s3:PutObject\",\r\n            \"Resource\": \"arn:aws:s3:::{{BUCKET_NAME}}/AWSLogs/arn:aws:sts::711129375688:assumed-role/se_demos_dev-developer/guy@hashicorp.com/*\",\r\n            \"Condition\": {\r\n                \"StringEquals\": {\r\n                    \"s3:x-amz-acl\": \"bucket-owner-full-control\"\r\n                }\r\n            }\r\n        },{\r\n            \"Sid\": \"AWSCloudTrailWrite\",\r\n            \"Effect\": \"Allow\",\r\n            \"Principal\": {\r\n              \"Service\": \"cloudtrail.amazonaws.com\"\r\n            },\r\n            \"Action\": \"s3:PutObject\",\r\n            \"Resource\": \"arn:aws:s3:::{{BUCKET_NAME}}/AWSLogs/arn:aws:sts::711129375688:assumed-role/se_demos_dev-developer/guy@hashicorp.com/*\",\r\n            \"Condition\": {\r\n                \"StringEquals\": {\r\n                    \"s3:x-amz-acl\": \"bucket-owner-full-control\"\r\n                }\r\n            }\r\n        }\r\n ] \r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{BUCKET_NAME}}.s3.{{AWS_REGION}}.amazonaws.com?policy",
+					"host": [
+						"{{BUCKET_NAME}}",
+						"s3",
+						"{{AWS_REGION}}",
+						"amazonaws",
+						"com"
+					],
+					"query": [
+						{
+							"key": "policy",
+							"value": null
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "8_LookupEvents",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Find IP Addresses to test in Virus Cloud\", function () {\r",
+							"    const responseJson = xml2Json(pm.response.text());\r",
+							"    const events = responseJson.LookupEventsResponse.LookupEventsResult.Events.member;\r",
+							"    function ValidateIPaddress(ipaddress) {  \r",
+							"  if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(ipaddress)) {  \r",
+							"    return (true)  \r",
+							"  }  \r",
+							"  return (false)  \r",
+							"}  \r",
+							"\r",
+							"    let ipaddresses = [];\r",
+							"    for (const e in events) {\r",
+							"        let ipaddress = JSON.parse(events[e].CloudTrailEvent).sourceIPAddress ;\r",
+							"        \r",
+							"        if (ValidateIPaddress(ipaddress)){\r",
+							"            ipaddresses.push(ipaddress);       \r",
+							"        };\r",
+							"        \r",
+							"    };\r",
+							"    \r",
+							"    \r",
+							"   \r",
+							"\r",
+							"    console.log(\"Ip Addresses ----> \" + JSON.stringify(ipaddresses));\r",
+							"    console.log(\"---> \" + ipaddresses[0]); \r",
+							"\r",
+							"   pm.collectionVariables.set(\"IP_ADDRESS\", ipaddresses[0]);\r",
+							"   pm.collectionVariables.set(\"IP_ADDRESSES\", ipaddresses);\r",
+							"    \r",
+							"})\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"var md5checksum = CryptoJS.MD5(\"\"+pm.request.body+\"\");\r",
+							"base64value = CryptoJS.enc.Base64.stringify(md5checksum);\r",
+							"postman.setGlobalVariable(\"contentMD5\", base64value);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "awsv4",
+					"awsv4": [
+						{
+							"key": "secretKey",
+							"value": "{{AWS_SECRET_KEY}}",
+							"type": "string"
+						},
+						{
+							"key": "sessionToken",
+							"value": "{{AWS_SESSION_TOKEN}}",
+							"type": "string"
+						},
+						{
+							"key": "service",
+							"value": "cloudtrail",
+							"type": "string"
+						},
+						{
+							"key": "region",
+							"value": "{{AWS_REGION}}",
+							"type": "string"
+						},
+						{
+							"key": "accessKey",
+							"value": "{{AWS_ACCESS_KEY}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-amz-json-1.1",
+						"type": "text"
+					},
+					{
+						"key": "Content-MD5",
+						"value": "{{contentMD5}}",
+						"type": "text",
+						"disabled": true
+					},
+					{
+						"key": "X-Amz-Target",
+						"value": "\"com.amazonaws.cloudtrail.v20131101.CloudTrail_20131101.LookupEvents\"",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"LookupAttributes\":[\r\n       {\r\n        \"AttributeKey\":\"EventName\",\r\n       \"AttributeValue\":\"ConsoleLogin\"\r\n       }\r\n       ],\r\n       \"StartTime\":\"2022-04-18T12:00:00Z\",\r\n       \"EndTime\":\"2022-04-19T12:00:00Z\",\r\n       \"EventCategory\":\"ConsoleLogin\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://cloudtrail.{{AWS_REGION}}.amazonaws.com/?Action=LookupEvents",
+					"protocol": "https",
+					"host": [
+						"cloudtrail",
+						"{{AWS_REGION}}",
+						"amazonaws",
+						"com"
+					],
+					"path": [
+						""
+					],
+					"query": [
+						{
+							"key": "EndTime",
+							"value": "2022-04-16T12:00:00Z",
+							"description": "Specifies that only events that occur before or at the specified time are returned.                                 If the specified end time is before the specified start time, an error is returned.",
+							"disabled": true
+						},
+						{
+							"key": "EventCategory",
+							"value": "insight",
+							"description": "Contains a list of lookup attributes. Currently the list can contain only one item.",
+							"disabled": true
+						},
+						{
+							"key": "MaxResults",
+							"value": "100",
+							"description": "The number of events to return. Possible values are 1 through 50. The default is 50.",
+							"disabled": true
+						},
+						{
+							"key": "NextToken",
+							"value": "",
+							"description": "The token to use to get the next page of results after a previous API call. This token                                 must be passed in with the same parameters that were specified in the the original                                 call. For example, if the original call specified an AttributeKey of 'Username' with                                 a value of 'root', the call with NextToken should include those same parameters.",
+							"disabled": true
+						},
+						{
+							"key": "StartTime",
+							"value": "2022-04-16T10:00:00Z",
+							"description": "Specifies that only events that occur after or at the specified time are returned.                                 If the specified start time is after the specified end time, an error is returned.",
+							"disabled": true
+						},
+						{
+							"key": "Action",
+							"value": "LookupEvents"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "9_IP_AddressReputation",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const ipaddresses = pm.collectionVariables.get(\"IP_ADDRESSES\");\r",
+							"\r",
+							"if (ipaddresses && ipaddresses.length > 0){\r",
+							"    postman.setNextRequest(\"9_IP_AddressReputation\");\r",
+							"} else {\r",
+							"    postman.setNextRequest(null);\r",
+							"}\r",
+							"\r",
+							"\r",
+							"pm.test(\"Get IP Address summary\", function () {\r",
+							"    \r",
+							"    const responseJson = JSON.parse(pm.response.text());\r",
+							"\r",
+							"    console.log(\"summary of \" + JSON.stringify(responseJson.data.id) + \" \" + JSON.stringify(responseJson.data.attributes.last_analysis_stats));\r",
+							"    \r",
+							"\r",
+							"})\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"let ipaddresses = pm.collectionVariables.get(\"IP_ADDRESSES\");\r",
+							"\r",
+							"\r",
+							"let ipaddress = ipaddresses.shift();\r",
+							"console.log(\"testing \" + ipaddress  );\r",
+							"console.log(\" still to test \" + JSON.stringify(ipaddresses));\r",
+							"pm.collectionVariables.set(\"IP_ADDRESS\", ipaddress);\r",
+							"pm.collectionVariables.set(\"IP_ADDRESSES\", ipaddresses);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "x-apikey",
+						"value": "{{VIRUSTOTAL_API_KEY}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "https://www.virustotal.com/api/v3/ip_addresses/{{IP_ADDRESS}}",
+					"protocol": "https",
+					"host": [
+						"www",
+						"virustotal",
+						"com"
+					],
+					"path": [
+						"api",
+						"v3",
+						"ip_addresses",
+						"{{IP_ADDRESS}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "99_DeleteBucket",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Bucket Deleted successfully\", function () {\r",
+							"    \r",
+							"     pm.response.to.have.status(204);\r",
+							"    \r",
+							"})\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{BUCKET_NAME}}.s3.{{AWS_REGION}}.amazonaws.com",
+					"host": [
+						"{{BUCKET_NAME}}",
+						"s3",
+						"{{AWS_REGION}}",
+						"amazonaws",
+						"com"
+					],
+					"query": [
+						{
+							"key": "",
+							"value": "",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "awsv4",
+		"awsv4": [
+			{
+				"key": "accessKey",
+				"value": "{{AWS_ACCESS_KEY}}",
+				"type": "string"
+			},
+			{
+				"key": "secretKey",
+				"value": "{{AWS_SECRET_KEY}}",
+				"type": "string"
+			},
+			{
+				"key": "service",
+				"value": "s3",
+				"type": "string"
+			},
+			{
+				"key": "sessionToken",
+				"value": "{{AWS_SESSION_TOKEN}}",
+				"type": "string"
+			},
+			{
+				"key": "region",
+				"value": "{{AWS_REGION}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "IP_ADDRESS",
+			"value": ""
+		},
+		{
+			"key": "IP_ADDRESSES",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "BUCKET_NAME",
+			"value": "guybarros-test-bucket",
+			"type": "string"
+		},
+		{
+			"key": "AWS_REGION",
+			"value": "eu-west-2",
+			"type": "string"
+		},
+		{
+			"key": "AWS_ACCESS_KEY",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "AWS_SECRET_KEY",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "AWS_SESSION_TOKEN",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "AWS_SESSION_EXPIRATION",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "VIRUSTOTAL_API_KEY",
+			"value": ""
+		}
+	]
+}
