@@ -344,7 +344,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n\"Version\":\"2008-10-17\",\r\n\"Id\":\"guy-test-s3-api-policy\",\r\n\"Statement\" : [\r\n    {\r\n        \"Effect\":\"Allow\",\r\n        \"Sid\":\"1\", \r\n        \"Principal\" : {\r\n            \"AWS\":[\"arn:aws:sts::711129375688:assumed-role/se_demos_dev-developer/guy@hashicorp.com\"]\r\n        },\r\n        \"Action\":[\"s3:*\"],\r\n        \"Resource\":\"arn:aws:s3:::{{BUCKET_NAME}}\"\r\n    },\r\n    {\r\n            \"Sid\": \"AWSCloudTrailAclCheck\",\r\n            \"Effect\": \"Allow\",\r\n            \"Principal\": {\r\n              \"Service\": \"cloudtrail.amazonaws.com\"\r\n            },\r\n            \"Action\": \"s3:GetBucketAcl\",\r\n            \"Resource\":\"arn:aws:s3:::{{BUCKET_NAME}}\"\r\n        },\r\n        {\r\n            \"Sid\": \"AWSCloudTrailWrite\",\r\n            \"Effect\": \"Allow\",\r\n            \"Principal\": {\r\n              \"Service\": \"cloudtrail.amazonaws.com\"\r\n            },\r\n            \"Action\": \"s3:PutObject\",\r\n            \"Resource\": \"arn:aws:s3:::{{BUCKET_NAME}}/AWSLogs/arn:aws:sts::711129375688:assumed-role/se_demos_dev-developer/guy@hashicorp.com/*\",\r\n            \"Condition\": {\r\n                \"StringEquals\": {\r\n                    \"s3:x-amz-acl\": \"bucket-owner-full-control\"\r\n                }\r\n            }\r\n        },{\r\n            \"Sid\": \"AWSCloudTrailWrite\",\r\n            \"Effect\": \"Allow\",\r\n            \"Principal\": {\r\n              \"Service\": \"cloudtrail.amazonaws.com\"\r\n            },\r\n            \"Action\": \"s3:PutObject\",\r\n            \"Resource\": \"arn:aws:s3:::{{BUCKET_NAME}}/AWSLogs/arn:aws:sts::711129375688:assumed-role/se_demos_dev-developer/guy@hashicorp.com/*\",\r\n            \"Condition\": {\r\n                \"StringEquals\": {\r\n                    \"s3:x-amz-acl\": \"bucket-owner-full-control\"\r\n                }\r\n            }\r\n        }\r\n ] \r\n}\r\n",
+					"raw": "{\r\n\"Version\":\"2008-10-17\",\r\n\"Id\":\"guy-test-s3-api-policy\",\r\n\"Statement\" : [\r\n    {\r\n        \"Effect\":\"Allow\",\r\n        \"Sid\":\"1\", \r\n        \"Principal\" : {\r\n            \"AWS\":[\"arn:aws:sts::711129375688:assumed-role/se_demos_dev-developer/guy@hashicorp.com\"]\r\n        },\r\n        \"Action\":[\"s3:*\"],\r\n        \"Resource\":\"arn:aws:s3:::{{BUCKET_NAME}}\"\r\n    },\r\n    {\r\n            \"Sid\": \"AWSCloudTrailAclCheck\",\r\n            \"Effect\": \"Allow\",\r\n            \"Principal\": {\r\n              \"Service\": \"cloudtrail.amazonaws.com\"\r\n            },\r\n            \"Action\": \"s3:GetBucketAcl\",\r\n            \"Resource\":\"arn:aws:s3:::{{BUCKET_NAME}}\"\r\n        },\r\n        {\r\n            \"Sid\": \"AWSCloudTrailWrite\",\r\n            \"Effect\": \"Allow\",\r\n            \"Principal\": {\r\n              \"Service\": \"cloudtrail.amazonaws.com\"\r\n            },\r\n            \"Action\": \"s3:PutObject\",\r\n            \"Resource\": \"arn:aws:s3:::{{BUCKET_NAME}}/AWSLogs/711129375688/*\",\r\n            \"Condition\": {\r\n                \"StringEquals\": {\r\n                    \"s3:x-amz-acl\": \"bucket-owner-full-control\"\r\n                }\r\n            }\r\n        }\r\n ] \r\n}\r\n",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -371,7 +371,135 @@
 			"response": []
 		},
 		{
-			"name": "8_LookupEvents",
+			"name": "8_CreateTrail",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"var md5checksum = CryptoJS.MD5(\"\"+pm.request.body+\"\");\r",
+							"base64value = CryptoJS.enc.Base64.stringify(md5checksum);\r",
+							"postman.setGlobalVariable(\"contentMD5\", base64value);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "awsv4",
+					"awsv4": [
+						{
+							"key": "secretKey",
+							"value": "{{AWS_SECRET_KEY}}",
+							"type": "string"
+						},
+						{
+							"key": "sessionToken",
+							"value": "{{AWS_SESSION_TOKEN}}",
+							"type": "string"
+						},
+						{
+							"key": "service",
+							"value": "cloudtrail",
+							"type": "string"
+						},
+						{
+							"key": "region",
+							"value": "{{AWS_REGION}}",
+							"type": "string"
+						},
+						{
+							"key": "accessKey",
+							"value": "{{AWS_ACCESS_KEY}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://cloudtrail.{{AWS_REGION}}.amazonaws.com/?Name={{CLOUD_TRAIL_NAME}}&S3BucketName={{BUCKET_NAME}}&Action=CreateTrail",
+					"protocol": "https",
+					"host": [
+						"cloudtrail",
+						"{{AWS_REGION}}",
+						"amazonaws",
+						"com"
+					],
+					"path": [
+						""
+					],
+					"query": [
+						{
+							"key": "CloudWatchLogsLogGroupArn",
+							"value": "",
+							"disabled": true
+						},
+						{
+							"key": "CloudWatchLogsRoleArn",
+							"value": "",
+							"disabled": true
+						},
+						{
+							"key": "EnableLogFileValidation",
+							"value": "",
+							"disabled": true
+						},
+						{
+							"key": "IncludeGlobalServiceEvents",
+							"value": "",
+							"disabled": true
+						},
+						{
+							"key": "IsMultiRegionTrail",
+							"value": "",
+							"disabled": true
+						},
+						{
+							"key": "IsOrganizationTrail",
+							"value": "",
+							"disabled": true
+						},
+						{
+							"key": "KmsKeyId",
+							"value": "",
+							"disabled": true
+						},
+						{
+							"key": "Name",
+							"value": "{{CLOUD_TRAIL_NAME}}"
+						},
+						{
+							"key": "S3BucketName",
+							"value": "{{BUCKET_NAME}}"
+						},
+						{
+							"key": "S3KeyPrefix",
+							"value": "",
+							"disabled": true
+						},
+						{
+							"key": "SnsTopicName",
+							"value": "",
+							"disabled": true
+						},
+						{
+							"key": "TagsList",
+							"value": "",
+							"disabled": true
+						},
+						{
+							"key": "Action",
+							"value": "CreateTrail"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "9_LookupEvents",
 			"event": [
 				{
 					"listen": "test",
@@ -536,7 +664,7 @@
 			"response": []
 		},
 		{
-			"name": "9_IP_AddressReputation",
+			"name": "10_IP_AddressReputation",
 			"event": [
 				{
 					"listen": "test",
@@ -545,7 +673,7 @@
 							"const ipaddresses = pm.collectionVariables.get(\"IP_ADDRESSES\");\r",
 							"\r",
 							"if (ipaddresses && ipaddresses.length > 0){\r",
-							"    postman.setNextRequest(\"9_IP_AddressReputation\");\r",
+							"    postman.setNextRequest(\"10_IP_AddressReputation\");\r",
 							"} else {\r",
 							"    postman.setNextRequest(null);\r",
 							"}\r",
@@ -603,6 +731,83 @@
 						"v3",
 						"ip_addresses",
 						"{{IP_ADDRESS}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "99_DeleteTrail",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Cloud Trail Deleted successfully\", function () {\r",
+							"    \r",
+							"     pm.response.to.have.status(200);\r",
+							"    \r",
+							"})\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "awsv4",
+					"awsv4": [
+						{
+							"key": "secretKey",
+							"value": "{{AWS_SECRET_KEY}}",
+							"type": "string"
+						},
+						{
+							"key": "sessionToken",
+							"value": "{{AWS_SESSION_TOKEN}}",
+							"type": "string"
+						},
+						{
+							"key": "service",
+							"value": "cloudtrail",
+							"type": "string"
+						},
+						{
+							"key": "region",
+							"value": "{{AWS_REGION}}",
+							"type": "string"
+						},
+						{
+							"key": "accessKey",
+							"value": "{{AWS_ACCESS_KEY}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://cloudtrail.{{AWS_REGION}}.amazonaws.com/?Name={{CLOUD_TRAIL_NAME}}&Action=DeleteTrail",
+					"protocol": "https",
+					"host": [
+						"cloudtrail",
+						"{{AWS_REGION}}",
+						"amazonaws",
+						"com"
+					],
+					"path": [
+						""
+					],
+					"query": [
+						{
+							"key": "Name",
+							"value": "{{CLOUD_TRAIL_NAME}}"
+						},
+						{
+							"key": "Action",
+							"value": "DeleteTrail"
+						}
 					]
 				}
 			},
@@ -743,6 +948,15 @@
 		{
 			"key": "VIRUSTOTAL_API_KEY",
 			"value": ""
+		},
+		{
+			"key": "CLOUD_TRAIL_NAME",
+			"value": "guytrail"
+		},
+		{
+			"key": "AWS_ACCOUNT_ID",
+			"value": "",
+			"type": "string"
 		}
 	]
 }
