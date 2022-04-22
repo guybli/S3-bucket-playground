@@ -15,6 +15,9 @@ This repo holds a Postman collection to:
 * delete cloud trail
 * delete bucket
 
+![ Overview ](./Assets/overview.png "Overview")
+
+
 ## Pre requisites
 
 [AWS access key](https://aws.amazon.com/premiumsupport/knowledge-center/create-access-key/) and [Virustotal API key](https://developers.virustotal.com/reference/getting-started) will be needed.
@@ -50,6 +53,7 @@ This collection requires certain variables to work:
 * VIRUSTOTAL_API_KEY
 * CLOUD_TRAIL_NAME
 * AWS_ACCOUNT_ID
+* BUCKET_OBJECT_KEY (Auto Populated)
 
 These can be added from the *Variables* Tab of the Collection:
 ![Collection variables](./Assets/collection_variables.png "Collection variables")
@@ -85,7 +89,5 @@ this will show all the test results in Postman and will show in the console the 
 ## Closing
 
 this is a quick demo  to highlight how we can use the power of APIs to automate security processes.
-
-I also introduced a bug to this collection, currently it is impossible to delete the bucket (since we'd need to delete the object first.) I'll fix this next.
 
 as always, PR welcomed.

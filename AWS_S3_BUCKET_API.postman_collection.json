@@ -383,6 +383,20 @@
 						],
 						"type": "text/javascript"
 					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Cloud Trail Created Successfully\", function () {\r",
+							"    \r",
+							"     pm.response.to.have.status(200);\r",
+							"    \r",
+							"})\r",
+							""
+						],
+						"type": "text/javascript"
+					}
 				}
 			],
 			"request": {
@@ -737,6 +751,49 @@
 			"response": []
 		},
 		{
+			"name": "11_ListBucketObjects",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"get Cloud Trail Object Key from Bucket\", function () {\r",
+							"    const responseJson = xml2Json(pm.response.text());\r",
+							"    \r",
+							"    console.log(\"----> \" + responseJson.ListBucketResult.Contents.Key );\r",
+							"\r",
+							"     pm.collectionVariables.set(\"BUCKET_OBJECT_KEY\", responseJson.ListBucketResult.Contents.Key );\r",
+							"})\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{BUCKET_NAME}}.s3.{{AWS_REGION}}.amazonaws.com",
+					"host": [
+						"{{BUCKET_NAME}}",
+						"s3",
+						"{{AWS_REGION}}",
+						"amazonaws",
+						"com"
+					],
+					"query": [
+						{
+							"key": "tagging",
+							"value": null,
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "99_DeleteTrail",
 			"event": [
 				{
@@ -808,6 +865,43 @@
 							"key": "Action",
 							"value": "DeleteTrail"
 						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "99_DeleteBucketObject",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Cloud Trail Bucket Object Deleted successfully\", function () {\r",
+							"    \r",
+							"     pm.response.to.have.status(204);\r",
+							"    \r",
+							"})\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{BUCKET_NAME}}.s3.{{AWS_REGION}}.amazonaws.com/{{BUCKET_OBJECT_KEY}}",
+					"host": [
+						"{{BUCKET_NAME}}",
+						"s3",
+						"{{AWS_REGION}}",
+						"amazonaws",
+						"com"
+					],
+					"path": [
+						"{{BUCKET_OBJECT_KEY}}"
 					]
 				}
 			},
@@ -955,6 +1049,11 @@
 		},
 		{
 			"key": "AWS_ACCOUNT_ID",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "BUCKET_OBJECT_KEY",
 			"value": "",
 			"type": "string"
 		}
